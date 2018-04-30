@@ -3,6 +3,7 @@
 This is a node applcation that responds with console log messages.
 
 The application will return:
+
     song details        Spotify is used as the source for song details
     movie details       IMDB (via the OBDM API) is the source for movie details
     tweets              Twitter is the source for tweets
