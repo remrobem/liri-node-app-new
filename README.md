@@ -10,7 +10,7 @@ The application will return:
 
 Execute by running:
 
-node liri.js <command> <parameter>
+node liri.js < command > < parameter >
 
 Valid commands and parameters are:
 
