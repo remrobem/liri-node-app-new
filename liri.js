@@ -4,6 +4,7 @@ const Spotify = require('node-spotify-api');
 const request = require('request');
 const fs = require('fs');
 const keys = require('./keys.js');
+const moment = require('moment');
 
 let outputLogOnly = false;
 
@@ -38,13 +39,10 @@ let outputData = '';
 let command = process.argv[2];
 let argument = parameterString();
 
+// process the single command proved in the direct request 
 processCommand();
-// mainProcess();
 
-// async function mainProcess() {
-//     await processCommand();
-// }
-
+// process the commands requested
 async function processCommand() {
     // proces the input request
     outputLogOnly = true;
@@ -186,12 +184,12 @@ async function movie() {
     return new Promise(resolve => {
 
         let movie = argument;
-        outputData = (`Movie Requested:${movie}`);
+        outputData = (`Movie Requested: ${movie}`);
         outputProcess(outputData);
 
         if (movie.length === 0) {
             movie = defaultMovie;
-            outputData = (`Default Movie Used:${movie}`);
+            outputData = (`Default Movie Used: ${movie}`);
             outputProcess(outputData);
         };
 
@@ -203,33 +201,38 @@ async function movie() {
             if (!error && response.statusCode === 200) {
                 // resolve(body);
                 movieDetails = JSON.parse(body);
-                outputData = (`-----------------------------------------------------------------------------------`);
-                outputProcess(outputData);
-                outputData = (`Title: ${movieDetails.Title}`);
-                outputProcess(outputData);
-                outputData = (`Year: ${movieDetails.Year}`);
-                outputProcess(outputData);
-                outputData = (`IMDB Rating: ${movieDetails.imdbRating}`);
-                outputProcess(outputData);
-                let movieRatings = movieDetails.Ratings;
-                let rtRating = 'N/A';
-                movieRatings.forEach(item => {
-                    if (item.Source === 'Rotten Tomatoes') {
-                        rtRating = item.Value;
-                    }
-                });
-                outputData = (`Rotten Tomatoes Rating: ${rtRating}`);
-                outputProcess(outputData);
-                outputData = (`Produced in: ${movieDetails.Country}`);
-                outputProcess(outputData);
-                outputData = (`Language: ${movieDetails.Language}`);
-                outputProcess(outputData);
-                outputData = (`Plot: ${movieDetails.Plot}`);
-                outputProcess(outputData);
-                outputData = (`Actors: ${movieDetails.Actors}`);
-                outputProcess(outputData);
-                outputData = (`-----------------------------------------------------------------------------------`);
-                outputProcess(outputData);
+                if (movieDetails.Response === "False") {
+                    outputData = (`Sorry, your movie was not found. Check your spelling or start words with Capital Letters and try again.`);
+                    outputProcess(outputData);
+                } else {
+                    outputData = (`-----------------------------------------------------------------------------------`);
+                    outputProcess(outputData);
+                    outputData = (`Title: ${movieDetails.Title}`);
+                    outputProcess(outputData);
+                    outputData = (`Year: ${movieDetails.Year}`);
+                    outputProcess(outputData);
+                    outputData = (`IMDB Rating: ${movieDetails.imdbRating}`);
+                    outputProcess(outputData);
+                    let movieRatings = movieDetails.Ratings;
+                    let rtRating = 'N/A';
+                    movieRatings.forEach(item => {
+                        if (item.Source === 'Rotten Tomatoes') {
+                            rtRating = item.Value;
+                        }
+                    });
+                    outputData = (`Rotten Tomatoes Rating: ${rtRating}`);
+                    outputProcess(outputData);
+                    outputData = (`Produced in: ${movieDetails.Country}`);
+                    outputProcess(outputData);
+                    outputData = (`Language: ${movieDetails.Language}`);
+                    outputProcess(outputData);
+                    outputData = (`Plot: ${movieDetails.Plot}`);
+                    outputProcess(outputData);
+                    outputData = (`Actors: ${movieDetails.Actors}`);
+                    outputProcess(outputData);
+                    outputData = (`-----------------------------------------------------------------------------------`);
+                    outputProcess(outputData);
+                }
             } else {
                 outputData = (`Something went wrong with the OMDB request`);
                 outputProcess(outputData);
@@ -240,69 +243,14 @@ async function movie() {
                 outputData = (`Body:${body}`);
                 outputProcess(outputData);
             };
+
             resolve();
         });
     });
-
-
-
-
-
-    // movieDetails = JSON.parse(movieDetails);
-
-    // outputData = (`-----------------------------------------------------------------------------------`);
-    // outputProcess(outputData);
-    // outputData = (`Title: ${movieDetails.Title}`);
-    // outputProcess(outputData);
-    // outputData = (`Year: ${movieDetails.Year}`);
-    // outputProcess(outputData);
-    // outputData = (`IMDB Rating: ${movieDetails.imdbRating}`);
-    // outputProcess(outputData);
-    // let movieRatings = movieDetails.Ratings;
-    // let rtRating = 'N/A';
-    // movieRatings.forEach(item => {
-    //     if (item.Source === 'Rotten Tomatoes') {
-    //         rtRating = item.Value;
-    //     }
-    // });
-    // outputData = (`Rotten Tomatoes Rating: ${rtRating}`);
-    // outputProcess(outputData);
-    // outputData = (`Produced in: ${movieDetails.Country}`);
-    // outputProcess(outputData);
-    // outputData = (`Language: ${movieDetails.Language}`);
-    // outputProcess(outputData);
-    // outputData = (`Plot: ${movieDetails.Plot}`);
-    // outputProcess(outputData);
-    // outputData = (`Actors: ${movieDetails.Actors}`);
-    // outputProcess(outputData);
-    // outputData = (`-----------------------------------------------------------------------------------`);
-    // outputProcess(outputData);
-
 };
 
 
-function getMovieDetails(query) {
-
-    // return new Promise(resolve => {
-    request(query, function (error, response, body) {
-        if (!error && response.statusCode === 200) {
-            resolve(body);
-        } else {
-            outputData = (`Something went wrong with the OMDB request`);
-            outputProcess(outputData);
-            outputData = (`Error:${error}`);
-            outputProcess(outputData);
-            outputData = (`Status Code:${response.statusCode}`);
-            outputProcess(outputData);
-            outputData = (`Body:${body}`);
-            outputProcess(outputData);
-            return;
-        }
-    });
-
-    // });
-};
-
+// process each command found in the random.txt file
 function random() {
 
     fs.readFile(fileName, 'utf8', function (err, data) {
@@ -332,11 +280,11 @@ function random() {
             let requestItem = element.split(',');
             command = requestItem[0];
             argument = requestItem[1];
-            // processCommand(argument);
             processCommand();
         });
     });
 };
+
 
 // convert the paramaters passed after the command into a string
 function parameterString() {
@@ -350,6 +298,7 @@ function parameterString() {
     return parameterStr;
 };
 
+//display valid commands
 function help() {
     outputData = (`Valid requests are: `);
     outputProcess(outputData);
@@ -363,6 +312,7 @@ function help() {
     outputProcess(outputData);
 };
 
+// handle bad command
 function badCommand() {
     outputData = (`${command} is not a valid request`);
     outputProcess(outputData);
@@ -373,7 +323,8 @@ function badCommand() {
 // write all console logs to log.txt
 function outputProcess(data) {
 
-    timestamp = new Date().toISOString().slice(-24).replace(/\D/g, '').slice(0, 14);
+    timestamp = new moment().format('YYYYMMDDHHmmSS')
+
     if (!outputLogOnly) {
         console.log(data);
     };
